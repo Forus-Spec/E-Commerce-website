@@ -1,0 +1,39 @@
+[{
+    "country": "CANADA",
+    "cities": [{
+        "name": "Alberta"
+      },
+      {
+        "name": "British Columbia"
+      },
+      {
+        "name": "Manitoba"
+      },
+      {
+        "name": "Quebec"
+      },
+      {
+        "name": "Brooklyn"
+      }
+    ]
+  },
+  {
+    "country": "USA",
+    "cities": [{
+        "name": "New York"
+      },
+      {
+        "name": "D.C washington"
+      },
+      {
+        "name": "Houston"
+      },
+      {
+        "name": "Los Angeles"
+      },
+      {
+        "name": "Brooklyn"
+      }
+    ]
+  }
+]
