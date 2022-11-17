@@ -9,8 +9,10 @@ React-e-commerce side project unfinished version almost 60% Heavly focused on de
 - React-router (Version 5 pattern)
 
 ## Quick Notes
-i thought this was ambitious project , i was heated when i started it just to find my self bit depressed wrting spaghetious 
-code all over the place this is was my first try , still considering basic designe principals and CSS designe i'v learned so much  
+i thought this was ambitious project , i was heated when i started it just to find my self writng spaghetious 
+code all over the place this is was my first try , still considering basic designe principals and CSS designe i'v learned so much
+
+PS:i'll be working on something far greater and far more orginised :D
 
 ## Status
 In Progess( Might not finish it)
