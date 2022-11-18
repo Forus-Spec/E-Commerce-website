@@ -97,11 +97,9 @@ export const createProduct = async(data,token)=>{
   })}
 
 export const getCategory = async(categoryId) => {
-  console.log("did it pass",categoryId);
   return await axios.get(`${baseUrl}/category/singleCategory/${categoryId}`);
 }
 
 export const getBrand = async(brandId) => {
-  console.log("did i make it ",brandId);
   return await axios.get(`${baseUrl}/brand/singleBrand/${brandId}`);
 }

@@ -12,7 +12,6 @@ import Button from "../UIComponents/Button";
 
 //This is our awesome { addFavorite, removeFavorite }
 
-
 const HeartButton = ({skeli = false,loading = false,productId = null} = {}) => {
 
   const isLoading = false;
@@ -24,19 +23,20 @@ const HeartButton = ({skeli = false,loading = false,productId = null} = {}) => {
 
   const favorites = useMutation(postId => addFavorite(postId, userToken), {
     onSuccess: (data, variables, context) => {
-      toast(`Successfully added to your favorite`, favoritesToast("❤️"));
+      toast(`Successfully added to your favorites`, favoritesToast("❤️"));
     },
     onError: (error, variables, context) => {
-     toast(`Error Happened which is amazing `, favoritesToast("⚠️"));
+     toast(`Error Happened which is amazing`, favoritesToast("⚠️"));
     }
   });
+
   const remove = useMutation(postId => removeFavorite(postId, userToken), {
     onSuccess: (data, variables, context) => {
       toast("Successfully removed to your favorites", favoritesToast("💔"));
     },
     onError: (error, variables, context) => {
       console.log("this is our awesome error message", error.response.data.msg);
-      toast("Something went wrong", favoritesToast("⚠️"));
+      toast("Something went totally wrong", favoritesToast("⚠️"));
     }
   });
 

@@ -11,49 +11,41 @@ import { COLORS } from "../../../Components/UIComponents/Constants";
 import { LoadingAnimation } from "../../../Components/UIComponents/Spinners/LoadingAnimation";
 
 const Filtering = () => {
-
   const queryClient = useQueryClient();
-  const auth        = React.useContext(AuthContext);
-  const userToken   = auth.authState && auth.authState.token;
+  const auth = React.useContext(AuthContext);
+  const userToken = auth.authState && auth.authState.token;
   const scrollingReference = React.useRef(null);
 
   const [{
   errorMessage,
-  successMessage},setFeedback]= React.useState({errorMessage:null,successMessage:null})
-  let {
-    data      : categories,
-    isLoading : isLoadingCategories,
-  } = useQuery(["categories"], () => {
+  successMessage},setFeedback] = React.useState({
+    errorMessage:null,
+    successMessage:null
+  })
+
+  let {status,data: categories, isLoading : isLoadingCategories,isFetching } = useQuery(["categories"], () => {
     return fetchCategories();
   });
 
-  let {
-    data     : brands,
-    isLoading: isLoadingBrands,
-  } = useQuery(["brands"], () => {
+  let {data: brands, isLoading: isLoadingBrands} = useQuery(["brands"], () => {
     return fetchBrands();
   });
-
-  const addCategory = useMutation((category) => createCategory(category,userToken)
-  ,{
-    onMutate:(res) => {
-      const oldCategory = queryClient.getQueryData(["categories",categories]);
-      queryClient.setQueryData(["categories",categories],
-      (data) => ({...data,res}));
-      return function rollback(){
-        queryClient.setQueryData(["categories",categories],(data)=> ({
-          ...data,
-          res:oldCategory
-        }));
+  const addCategory = useMutation((category) => createCategory(category,userToken),{
+    onMutate:async (category) => {
+      await queryClient.cancelQueries("categories");
+      const previousValue = queryClient.getQueryData("categories")
+      queryClient.setQueryData("categories",(old) => ({
+      ...old,
+      categories:[...old.data.categories,category]
+      }))
+      return previousValue.data.categories;
+    },
+      onError: (err, variables, previousValue) => {
+        queryClient.setQueryData("categories", previousValue.data.categories);
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries("categories");
       }
-    },
-    onError:(error,variables,rollback)=>{
-      rollback();
-    },
-    onSuccess:(data,variables,rollback)=>{
-      rollback();
-      queryClient.setQueryData(["categories",categories],data)
-    }
   })
   const addBrand = useMutation((brand)=>{
     return createBrand(brand,userToken);
@@ -61,7 +53,8 @@ const Filtering = () => {
     onSuccess:() => {
       queryClient.invalidateQueries(["brands"],{exact:true})
     },
-    onError:()=>{}
+    onError:()=>{
+    }
   })
   const removeBrand = useMutation((brandSlug) => {
     return deleteBrand(brandSlug,userToken);
@@ -75,13 +68,9 @@ const Filtering = () => {
   })
   const removeCategory = useMutation((categorySlug)=>{
     return deleteCategory(categorySlug,userToken)
-  },
-  {
+  },{
     onSuccess:() => queryClient.invalidateQueries(["categories"],{exact:true})
-   ,onError:()=>{}
   })
-  // these are our awesome categories functionality
-  console.log(categories && categories);
 
   return (
     <>
@@ -95,7 +84,7 @@ const Filtering = () => {
             addBrand.mutate(name,userToken)
             setTimeout(()=>{
               addBrand.reset();
-            },1500)
+            },2500)
           }}>
           <InputField
             placeHolder="add new brand"
@@ -104,7 +93,7 @@ const Filtering = () => {
             id="brand"
           />
           <Button
-              isLoading={addBrand.isLoading}
+              isLoading={addBrand.isFetching}
               type="submit"
               variant="circular"
               size="normal"
@@ -124,10 +113,10 @@ const Filtering = () => {
       </Section>
         <Title>Feedback</Title>
          <Box>
-          {addBrand.isSuccess       ? "Brand successfully Created" : addCategory.isSuccess ? "Category Successfully Created":""}
-          {addBrand.isError         ? addBrand.error    && addBrand.error.response.data.msg.toUpperCase() + "❌" : ""}
-          {addCategory.isError      ? addCategory.error && addCategory.error.response.data.msg.toUpperCase()+"❌" : ""}
-          {removeBrand.isSuccess    ? "Brand Successfully Removed" : removeCategory.isSuccess ? "Category Successfully Removed":""}
+          {addBrand.isSuccess     ? "Brand successfully Created " : addCategory.isSuccess ? "Category Successfully Created":""}
+          {addBrand.isError       ? addBrand.error && addBrand.error.response.data.msg.toUpperCase() + "❌" : ""}
+          {addCategory.isError    ? addCategory.error && addCategory.error.response.data.msg.toUpperCase()+"❌" : ""}
+          {removeBrand.isSuccess  ? "Brand successfully Removed " : removeCategory.isSuccess ? "Category Successfully Removed":""}
           </Box>
       <Section>
         <Title>Category (Optimistic UI)</Title>
@@ -136,9 +125,9 @@ const Filtering = () => {
            if(addCategory.isLoading) return;
            const name = event.target.category.value
            addCategory.mutate(name)
-            // setTimeout(()=>{
-            //   addCategory.reset();
-            // },1500)
+            setTimeout(()=>{
+              addCategory.reset();
+            },2500)
         }}
         >
           <InputField
@@ -148,12 +137,15 @@ const Filtering = () => {
           />
           <Button
             isLoading={addCategory.isLoading}
+            disabled={addCategory.isLoading}
             variant="circular"
             size="normal"
             type="submit">
             Submit
           </Button>
+          {addCategory.isLoading ? "Creating...":"Idle"}
         </SubWrapper>
+        <div>{isFetching ? "updating in background...":""}</div>
         <ScrollableContent
             isDeleting={removeCategory.isLoading}
             isLoading={isLoadingCategories}
@@ -170,9 +162,6 @@ const Filtering = () => {
 
 
 const ScrollableContent = forwardRef((props,ref)=> {
-  // This is the greatest thing ever
-  console.log("This our props.data functionality",props.data);
-
   return (
     <Container ref={ref} >
       <ScrollBox>

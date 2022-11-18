@@ -19,7 +19,7 @@ export const deleteAvatar = async publicId => {
 export const addFavorite = async (productId, token) => {
   // const id = JSON.stringify(productId);
   return await axios.post(
-    `${baseUrl}/user/wishlist`,{ productId:productId },{ headers: { Authorization: `Bearer ${token}` } }
+    `${baseUrl}/user/products/favorites`,{ productId:productId },{ headers: { Authorization: `Bearer ${token}` } }
   );
 };
 export const removeFavorite = async (id,token) => {

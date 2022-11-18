@@ -6,44 +6,55 @@ import { getBrand, getCategory } from "../../lib/productAPI";
 import Button from '../../Components/UIComponents/Button/Button'
 import Icon from "../../Components/Icon";
 
-const ProductItem = ({name,categoryId,brandId,price}) => {
-  // This is our brandData functionality
+const ProductItem = ({name,categoryId,brandId,price,description,imageUrl}={}) => {
+
+  console.group("Filtering Id");
+  console.log("CategoryId",categoryId && categoryId);
+  console.log("BrandId", brandId && brandId);
+  console.log("Price", price);
+  console.log("Name", name);
+  console.groupEnd("Awesome");
+
   const {
-    data     :brandData ,
+    data:brandData ,
     isLoading:isLoadingBrand,
-    isSuccess:isSuccessBrand}  = useQuery(() => {
+    isSuccess:isSuccessBrand}  = useQuery(["brand"],() => {
     return  getBrand(brandId);
+  },{
+    enabled:!!brandId
   })
   // This is our categoryData functionality
   const {
-  data     :categoryData,
+  data:categoryData,
   isLoading:isLoadingCategory,
-  isSuccess:isSuccessCategory} = useQuery(() => {
+  isSuccess:isSuccessCategory} = useQuery(["category"],() => {
     return  getCategory(categoryId);
+  },{
+    enabled:!!categoryId
   })
-  console.group("category&brand");
-  console.log("categoryId",categoryId);
-  console.log("brandId",brandId);
-  console.log(brandData    && brandData);
-  console.log(categoryData && categoryData);
+  console.group("Category & brand");
+  console.log("isCategoryLoading",isLoadingCategory);
+  console.log(isSuccessBrand   && brandData);
+  console.log(isSuccessCategory && categoryData);
+  console.log("Image url 🎴",imageUrl);
   console.groupEnd();
+
   return (
     <Wrapper>
       <ProductCard>
-        <Category>Category</Category>
-        <TitleWrapper>
-          <Title>Sennheizer</Title>
-          <Review aria-label="product reviews">
-            <Icon name="message" />
-            Reviews
-          </Review>
-        </TitleWrapper>
+    <MainHeaderWrapper>
+    <ImageCover src={imageUrl && imageUrl} alt={name} />
+      <SubHeaderWrapper>
+          <Title>Product: {name}</Title>
+        <FilteringWrapper>
+          <Category>Category: {isLoadingCategory && "Loading" || isSuccessCategory && categoryData.data.name}</Category>
+          <Category>Brand: {isLoadingBrand && "Loading" || isSuccessBrand && brandData.data.name}</Category>
+        </FilteringWrapper>
+      </SubHeaderWrapper>
+    </MainHeaderWrapper>
         <Description>
-          Lorem Ipsum is simply the dumbest thing ever text of the printing and typesetting
-          typesetting. Lorem Ipsum is simply dummy text of the
-          printing and annoyed.
+          {description}
         </Description>
-        <Footer>
             <Stars>
               <li>
                 <Icon size={32} name="star" />
@@ -61,40 +72,68 @@ const ProductItem = ({name,categoryId,brandId,price}) => {
                 <Icon size={32} name="star" />
               </li>
             </Stars>
-          <div>
+            <br></br>
+            <FooterWrapper>
             <Price>
-              <PreviousPrice>$96.00</PreviousPrice>
-              <b>$230.99</b>
+              <b>Price: {price}$</b>
             </Price>
-            <InputFlow>
+            <div>
+
               <Button
                 size="large"
-                isSuccess={true}
+                variant="outline"
+                onSubmit={() => {}}
+                arial-label="add product"
+              >
+                Remove
+              </Button>
+              <Button
+                size="large"
                 onSubmit={() => {}}
                 arial-label="add product"
               >
                 Add Cart
               </Button>
-            </InputFlow>
-          </div>
-        </Footer>
+            </div>
+            </FooterWrapper>
       </ProductCard>
     </Wrapper>
   );
 };
 
+const FooterWrapper = styled.div`
+  display:flex;
+  justify-content:space-between ;
+  align-items:baseline ;
+`
+const SubHeaderWrapper = styled.div`
+border:1px solid black;
+padding:10px;
+border-color:${COLORS.orange};
+border-radius:9px ;
+`
+const MainHeaderWrapper = styled.div`
+  display:flex;
+  flex-direction:row-reverse ;
+  justify-content:space-between ;
+  align-items:center ;
+`
 const Title = styled.h1`
   margin-top: 8px;
   display: block;
-  border-radius: 8px;
-  margin-bottom: 8px;
   font-weight: 800;
-  font-size: 2rem;
-  color: #363636;
+  font-size: 1.8rem;
+  color: ${COLORS.orange};
 `;
 
+const FilteringWrapper = styled.div`
+display:flex;
+justify-content:row;
+gap:30px;
+`
+
 const Wrapper = styled.div`
-  margin-top: 20px;
+  margin-top: 10px;
   padding: 8px;
   background-image: ${COLORS.primary};
   border-radius: 8px;
@@ -107,19 +146,26 @@ flex-direction:row ; */
   margin-right: auto;
   margin-left: auto;
 `;
+// This is our imageCover functionality
+const ImageCover = styled.img`
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center right;
+`
+
 
 const InputFlow = styled.div`
-  display: flex;
-  gap: 20px;
 `;
 // this is our TitleWrapper functionality
 const TitleWrapper = styled.div`
   font-size: 2rem;
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  gap: 60px;
+  align-items: flex-start;
+  justify-content:center ;
+  gap: 20px;
 `;
 
 const ProductCard = styled.article`
@@ -142,7 +188,7 @@ const Stock = styled.div`
 const Banner = styled.em`
   margin-bottom: 8px;
   border-radius: 1px;
-  margin-left: -29px;
+  margin-left: -2px;
   font-size: 1rem;
   font-weight: 800;
   background: linear-gradient(0deg, #b02e0c 0%, #eb4511 100%);
@@ -155,52 +201,32 @@ const Banner = styled.em`
 // This is our category functionality which is huge and awesome
 const Category = styled.div`
   display: block;
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   font-weight: 500;
   color: #363636;
+  margin-bottom:10px;
+  width:fit-content;
+  padding:10px;
+  border-radius:18px;
+  background-color:${COLORS.transparentGray15} ;
 `;
 const Stars = styled.ol`
-  margin-top: 20px;
+  margin-top: 10px;
   display: flex;
   list-style: none;
 `;
 const Description = styled.p`
   font-weight: 600;
-  font-size: 1.1rem;
+  font-size: 1.01rem;
   max-width: 1000px;
 `;
 
-const Footer = styled.aside`
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-`;
 const Price = styled.div`
-  text-align: right;
   font-size: 1.35rem;
   color: #131313;
   font-weight: 800;
-  bottom: 18px;
 `;
-const PreviousPrice = styled.b`
-  font-size: 70%;
-  font-weight: 100;
-  text-decoration: line-through;
-  display: block;
-  margin-left: -5px;
-`;
-const Review = styled.div`
-  display: flex;
-  gap: 4px;
-  border-bottom-width: 1px;
-  border-bottom-color: rgba(128, 128, 128, 0.534);
-  border-bottom-style: solid;
-  width: fit-content;
-  color: #06060674;
-  font-weight: 500;
-  font-size: 22px;
-  cursor: pointer;
-`
+
 
 
 export default ProductItem;

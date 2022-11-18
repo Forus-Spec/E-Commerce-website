@@ -16,7 +16,7 @@ router.route("/category/:slug").post(attachUser, requireAdmin, updateCategory);
 router
   .route("/category/:slug")
   .delete(attachUser, requireAdmin, deleteCategory);
-
 router.route("/category/singleCategory/:categoryId").get(getCategory);
+
 
 export default router;
