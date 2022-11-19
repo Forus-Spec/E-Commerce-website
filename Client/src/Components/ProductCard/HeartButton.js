@@ -2,10 +2,10 @@ import React from "react";
 import Tooltip from "@reach/tooltip";
 import styled, { keyframes, css } from "styled-components";
 import Icon from "../Icon";
-import { useMutation } from "react-query";
+import { useQueryClient, useMutation, useQuery } from "react-query";
 import toast from "react-hot-toast";
 import { COLORS } from "../UIComponents/Constants";
-import { addFavorite, removeFavorite } from "../../lib/userAPI";
+import { addFavorite, removeFavorite,fetchFavorites, } from "../../lib/userAPI";
 import { AuthContext } from "../../Context/AuthContext";
 import { favoritesToast } from "../UIComponents/Notification/notification";
 import Button from "../UIComponents/Button";
@@ -13,26 +13,33 @@ import Button from "../UIComponents/Button";
 //This is our awesome { addFavorite, removeFavorite }
 
 const HeartButton = ({skeli = false,loading = false,productId = null} = {}) => {
-
   const isLoading = false;
   const listItem  = false;
+
+  const queryClient = new useQueryClient();
 
   const auth = React.useContext(AuthContext);
 
   const userToken = auth && auth.authState.token;
 
+  const {data:listItems } = useQuery(["wishlist"],()=> fetchFavorites(userToken));
+
+  const item = listItems && listItems.data.wishlist.find(li=>li._id===productId) || null;
+
   const favorites = useMutation(postId => addFavorite(postId, userToken), {
     onSuccess: (data, variables, context) => {
       toast(`Successfully added to your favorites`, favoritesToast("❤️"));
+      queryClient.invalidateQueries(["wishlist"],{exact:true})
     },
     onError: (error, variables, context) => {
      toast(`Error Happened which is amazing`, favoritesToast("⚠️"));
     }
   });
-
-  const remove = useMutation(postId => removeFavorite(postId, userToken), {
+  //this is our great remove functionality
+  const remove = useMutation((productId) => removeFavorite(productId, userToken), {
     onSuccess: (data, variables, context) => {
       toast("Successfully removed to your favorites", favoritesToast("💔"));
+      queryClient.invalidateQueries(["wishlist"],{exact:true})
     },
     onError: (error, variables, context) => {
       console.log("this is our awesome error message", error.response.data.msg);
@@ -47,7 +54,7 @@ const HeartButton = ({skeli = false,loading = false,productId = null} = {}) => {
 
   return (
     <>
-      {listItem ? (
+      {item ? (
         <Tooltip
           label="Remove from your favorites"
           style={{
@@ -60,7 +67,7 @@ const HeartButton = ({skeli = false,loading = false,productId = null} = {}) => {
             padding: "0.5em 0.7em"
           }}
         >
-          <Heart onClick={remove.mutate(productId)}>
+          <Heart onClick={()=>remove.mutate(productId)}>
             <Icon
               active={true}
               hover={true}
@@ -83,7 +90,6 @@ const HeartButton = ({skeli = false,loading = false,productId = null} = {}) => {
             padding: "0.5em 0.7em"
           }}
         >
-          {/* */}
           {!isLoading ? (
             <Heart skeli={loading} onClick={() => favorites.mutate(productId)}>
               {(!loading && (

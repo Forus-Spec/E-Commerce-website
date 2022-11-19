@@ -44,6 +44,6 @@ router.route("/user/order").post(attachUser, createOrder);
 
 router.route("/user/products/favorites").post(attachUser, addToWishlist);
 router.route("/user/products/favorites").get(attachUser, wishlist);
-router.route("/user/favorites/:productId").put(attachUser, removeFromWishlist);
+router.route("/user/favorites/:productId").post(attachUser, removeFromWishlist);
 
 export default router;
