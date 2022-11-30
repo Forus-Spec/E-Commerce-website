@@ -6,15 +6,13 @@ React-e-commerce side project unfinished version almost 60% Heavly focused on de
 - Node.js
 - Styled-component
 - React-query
-- React-router (Version 5 pattern)
+- React-router (Version 5 patterns)
 
 ## Quick Notes
 i thought this was ambitious project , i was heated when i started it just to find my self writing spaghetious 
 code all over the place 
 still this is was my first try , 
 considering basic designe principals and CSS designe i'v learned so much !
-
-PS:i'll be working on something far greater and far more orginised :D
 
 ## Status
 In Progess( Might not finish it)
