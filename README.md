@@ -14,11 +14,6 @@ code all over the place
 still this is was my first try , 
 considering basic designe principals and CSS designe i'v learned so much !
 
-## Status
-In Progess( Might not finish it)
-
-#
-
 # Pictures 
 
 ## Simple admin dashboard
